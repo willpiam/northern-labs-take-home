@@ -11,6 +11,7 @@ import {
 
 import AddressDetails from './AddressDetails';
 import TransactionDetails from './TransactionDetails';
+import SearchBar from './SearchBar';
 
 function App() {
   return (
@@ -28,6 +29,9 @@ function App() {
             </li>
             <li>
               <Link to="/tx">Transaction</Link>
+            </li>
+            <li>
+              <SearchBar />
             </li>
           </ul>
         </nav>
