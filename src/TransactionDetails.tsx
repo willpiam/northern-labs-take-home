@@ -3,6 +3,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { getEthereumProvider, getPolygonProvider } from './Providers';
+import './TransactionDetails.css';
 
 function isValidEthereumTxHash(txHash: string): boolean {
     const regex = /^0x[a-fA-F0-9]{64}$/;
@@ -16,6 +17,15 @@ type TxDetails = {
     fee: string,
     nonce: number,
     reverted: boolean,
+}
+
+function DetailItem({ label, value }: { label: string, value: string }) {
+    return (
+        <div className="detail-item">
+            <span>{label}</span>
+            <strong>{value}</strong>
+        </div>
+    );
 }
 
 export default function TransactionDetails() {
@@ -54,7 +64,7 @@ export default function TransactionDetails() {
             }
 
             const receipt = await (ethereumResult === null ? polygon : ethereum).getTransactionReceipt(tx_input!);
-            console.log("recipt: " , receipt);
+            console.log("recipt: ", receipt);
             const didRevert = receipt?.status === 0;
             const result = ethereumResult ?? polygonResult;
 
@@ -77,76 +87,125 @@ export default function TransactionDetails() {
 
 
     }, [valid, tx_input])
-
-    if (!valid)
-        return <>
-            <h1>Invalid Transaction Hash</h1>
-            <h2>{tx_input}</h2>
-            <Link to="/tx/0x5a2e936f418affd295fcd91e8bbbbcc04ad58451bed856d4cf5b2413bd270a72">Try a demo Transaction</Link>
+    return (
+        <>
+            {!valid ? (
+                <div className="error">
+                    <h1>Invalid Transaction Hash</h1>
+                    <h2>{tx_input}</h2>
+                    <Link to="/tx/0x5a2e936f418affd295fcd91e8bbbbcc04ad58451bed856d4cf5b2413bd270a72">
+                        Try a demo Transaction
+                    </Link>
+                </div>
+            ) : (
+                <div className="transaction-details">
+                    <h1>Transaction Details</h1>
+                    <h2>{tx_input}</h2>
+                    <div className="details-grid">
+                        {details && (
+                            <>
+                                <DetailItem label="Chain" value={details.chain} />
+                                <DetailItem label="Amount" value={details.amount} />
+                                <DetailItem label="Timestamp" value={details.timestamp} />
+                                <DetailItem
+                                    label="Confirmation Status"
+                                    value={details.reverted ? 'Reverted' : 'Confirmed'}
+                                />
+                                <DetailItem label="Fee" value={details.fee} />
+                                <DetailItem label="Nonce" value={details.nonce.toString()} />
+                                <div className="detail-item">
+                                    <span>View More</span>
+                                    <a
+                                        href={
+                                            details.chain === 'ethereum'
+                                                ? `https://etherscan.io/tx/${tx_input}`
+                                                : `https://polygonscan.com/tx/${tx_input}`
+                                        }
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        View Via External Explorer
+                                    </a>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
         </>
-
-    return <>
-        <h1>Transaction Details</h1>
-        <h2>{tx_input}</h2>
-        <table border={1}>
-            <thead>
-                <tr>
-                    <th>
-                        Chain
-                    </th>
-                    <th>
-                        Amount
-                    </th>
-                    <th>
-                        Timestamp
-                    </th>
-                    <th>
-                        Confirmation Status
-                    </th>
-                    <th>
-                        Fee
-                    </th>
-                    <th>
-                        Nonce
-                    </th>
-                    <th>
-                        View More
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        {details?.chain}
-                    </td>
-                    <td>
-                        {details?.amount}
-                    </td>
-                    <td>
-                        {details?.timestamp}
-                    </td>
-                    <td>
-                        {details ? details.reverted ? 'Reverted' : 'Confirmed' : 'Loading...'}
-                    </td>
-                    <td>
-                        {details?.fee}
-                    </td>
-                    <td>
-                        {details?.nonce}
-                    </td>
-                    <td>
-                        {/* open explorer in new tab */}
-                        <a href={details?.chain === 'ethereum' ? `https://etherscan.io/tx/${tx_input}` : `https://polygonscan.com/tx/${tx_input}`}
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            View Via External Explorer
-                        </a>
-                    </td>
-                </tr>
-            </tbody>
-
-        </table>
-
-    </>
+    );
 }
+
+
+// if (!valid)
+//     return <>
+//         <h1>Invalid Transaction Hash</h1>
+//         <h2>{tx_input}</h2>
+//         <Link to="/tx/0x5a2e936f418affd295fcd91e8bbbbcc04ad58451bed856d4cf5b2413bd270a72">Try a demo Transaction</Link>
+//     </>
+
+// return <>
+//     <h1>Transaction Details</h1>
+//     <h2>{tx_input}</h2>
+//     <table border={1}>
+//         <thead>
+//             <tr>
+//                 <th>
+//                     Chain
+//                 </th>
+//                 <th>
+//                     Amount
+//                 </th>
+//                 <th>
+//                     Timestamp
+//                 </th>
+//                 <th>
+//                     Confirmation Status
+//                 </th>
+//                 <th>
+//                     Fee
+//                 </th>
+//                 <th>
+//                     Nonce
+//                 </th>
+//                 <th>
+//                     View More
+//                 </th>
+//             </tr>
+//         </thead>
+//         <tbody>
+//             <tr>
+//                 <td>
+//                     {details?.chain}
+//                 </td>
+//                 <td>
+//                     {details?.amount}
+//                 </td>
+//                 <td>
+//                     {details?.timestamp}
+//                 </td>
+//                 <td>
+//                     {details ? details.reverted ? 'Reverted' : 'Confirmed' : 'Loading...'}
+//                 </td>
+//                 <td>
+//                     {details?.fee}
+//                 </td>
+//                 <td>
+//                     {details?.nonce}
+//                 </td>
+//                 <td>
+//                     {/* open explorer in new tab */}
+//                     <a href={details?.chain === 'ethereum' ? `https://etherscan.io/tx/${tx_input}` : `https://polygonscan.com/tx/${tx_input}`}
+//                         target="_blank"
+//                         rel="noreferrer"
+//                     >
+//                         View Via External Explorer
+//                     </a>
+//                 </td>
+//             </tr>
+//         </tbody>
+
+//     </table>
+
+// </>
+// }
