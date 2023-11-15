@@ -16,13 +16,13 @@ function App() {
     <Router>
       <div>
         {/* Links to navigate */}
-        <Link to="/route1">Route 1</Link>
-        <Link to="/route2">Route 2</Link>
+        <Link to="/address">Address</Link>
+        <Link to="/tx">Transaction</Link>
 
         {/* Route configuration */}
         <Routes>
-          <Route path="/route1" element={<AddressDetails />} />
-          <Route path="/route2" element={<TransactionDetails />} />
+          <Route path="/address/:address_input" element={<AddressDetails />} />
+          <Route path="/tx/:tx_input" element={<TransactionDetails />} />
         </Routes>
       </div>
     </Router>
