@@ -13,9 +13,9 @@ type TxDetails = {
     chain: 'ethereum' | 'polygon',
     amount: string,
     timestamp: string,
-    confirmationStatus: 'loading' | 'successful' | 'failed',
     fee: string,
     nonce: number,
+    reverted: boolean,
 }
 
 export default function TransactionDetails() {
@@ -53,6 +53,9 @@ export default function TransactionDetails() {
                 return;
             }
 
+            const receipt = await (ethereumResult === null ? polygon : ethereum).getTransactionReceipt(tx_input!);
+            console.log("recipt: " , receipt);
+            const didRevert = receipt?.status === 0;
             const result = ethereumResult ?? polygonResult;
 
             // to get the timestamp we need the block
@@ -64,9 +67,9 @@ export default function TransactionDetails() {
                 chain: ethereumResult === null ? 'polygon' : 'ethereum',
                 amount: `${ethers.formatEther(result!.value)} ${ethereumResult === null ? 'MATIC' : 'ETH'}`,
                 timestamp: timestamp,
-                confirmationStatus: 'successful', // temporary place holder 
                 fee: `${ethers.formatEther(result!.gasPrice * result!.gasLimit)} ${ethereumResult === null ? 'MATIC' : 'ETH'}`,
                 nonce: result!.nonce,
+                reverted: didRevert,
             }
 
             setDetails(details);
@@ -106,6 +109,9 @@ export default function TransactionDetails() {
                     <th>
                         Nonce
                     </th>
+                    <th>
+                        View More
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -120,13 +126,22 @@ export default function TransactionDetails() {
                         {details?.timestamp}
                     </td>
                     <td>
-                        {details?.confirmationStatus}
+                        {details ? details.reverted ? 'Reverted' : 'Confirmed' : 'Loading...'}
                     </td>
                     <td>
                         {details?.fee}
                     </td>
                     <td>
                         {details?.nonce}
+                    </td>
+                    <td>
+                        {/* open explorer in new tab */}
+                        <a href={details?.chain === 'ethereum' ? `https://etherscan.io/tx/${tx_input}` : `https://polygonscan.com/tx/${tx_input}`}
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            View Via External Explorer
+                        </a>
                     </td>
                 </tr>
             </tbody>
