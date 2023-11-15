@@ -2,8 +2,9 @@ import { ethers } from 'ethers';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { getEthereumProvider, getPolygonProvider } from './Providers';
 
-function isValidEthereumTxHash(txHash: string): boolean {
+function isValidEthereumTxHash(txHash: string): boolean { 
     const regex = /^0x[a-fA-F0-9]{64}$/;
     return regex.test(txHash);
 }
@@ -11,7 +12,7 @@ function isValidEthereumTxHash(txHash: string): boolean {
 type TxDetails = {
     chain: 'ethereum' | 'polygon',
     amount: string,
-    timestamp: 'string',
+    timestamp: string,
     confirmationStatus: 'loading' | 'successful' | 'failed',
     fee: string,
 }
@@ -19,7 +20,7 @@ type TxDetails = {
 export default function TransactionDetails() {
     const { tx_input } = useParams();
     const [valid, setValid] = React.useState(false);
-    const [chain, setChain] = React.useState<'ethereum' | 'polygon' | 'loading'>('loading');
+    const [details, setDetails] = React.useState<TxDetails | null>(null);
 
     React.useEffect(() => { // is the provided input a valid address?
         if (tx_input === undefined)
@@ -34,9 +35,43 @@ export default function TransactionDetails() {
     }, [tx_input]);
 
     React.useEffect(() => { // find the transaction details
+        if (!valid)
+            return;
+
+        const ethereum = getEthereumProvider();
+        const polygon = getPolygonProvider();
+        
+        (async () => { // use the provider to get the transaction details
+
+            const ethereumResult = await ethereum.getTransaction(tx_input!);
+            const polygonResult = await polygon.getTransaction(tx_input!);
+
+            // case -> both null
+            if (ethereumResult === null && polygonResult === null) {
+                // handle error -> indicate that the transaction does not exist
+                return;
+            }
+
+            const result = ethereumResult ?? polygonResult;
+
+            // to get the timestamp we need the block
+            const block = await (ethereumResult === null ? polygon : ethereum).getBlock(result!.blockNumber!);
+
+            const timestamp = new Date(block!.timestamp * 1000).toLocaleString();
+
+            const details : TxDetails = {
+                chain: ethereumResult === null ? 'polygon' : 'ethereum',
+                amount: ethers.formatEther(result!.value),
+                timestamp: timestamp,
+                confirmationStatus: 'successful', // temporary place holder
+                fee: ethers.formatEther(result!.gasPrice * result!.gasLimit), // not confident on this formula
+            } 
+          
+            setDetails(details);
+        })();
 
 
-    })
+    }, [valid, tx_input])
 
     if (!valid)
         return <>
@@ -48,7 +83,45 @@ export default function TransactionDetails() {
     return <>
         <h1>Transaction Details</h1>
         <h2>{tx_input}</h2>
+        <table border={1}>
+            <thead>
+                <th>
+                    Chain
+                </th>
+                <th>
+                    Amount
+                </th>
+                <th>
+                    Timestamp
+                </th>
+                <th>
+                    Confirmation Status
+                </th>
+                <th>
+                    Fee
+                </th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        {details?.chain}
+                    </td>
+                    <td>
+                        {details?.amount}
+                    </td>
+                    <td>
+                        {details?.timestamp}
+                    </td>
+                    <td>
+                        {details?.confirmationStatus}
+                    </td>
+                    <td>
+                        {details?.fee}
+                    </td>
+                </tr>
+            </tbody>
 
+        </table>
 
     </>
 }
