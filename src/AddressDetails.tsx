@@ -37,7 +37,6 @@ export default function AddressDetails() {
         const polygon = getPolygonProvider();
 
         (async () => {
-
             const ethereumTxCount = await ethereum.getTransactionCount(address_input!);
             const polygonTxCount = await polygon.getTransactionCount(address_input!);
 
@@ -45,6 +44,25 @@ export default function AddressDetails() {
                 ethereum: ethereumTxCount,
                 polygon: polygonTxCount,
                 total: ethereumTxCount + polygonTxCount,
+            });
+        })();
+    }, [valid, address_input]);
+
+    React.useEffect(() => { // find the accounts balance
+        if (!valid)
+            return;
+
+        const ethereum = getEthereumProvider();
+        const polygon = getPolygonProvider();
+
+        (async () => {
+            const ethereumBalance = await ethereum.getBalance(address_input!);
+            const polygonBalance = await polygon.getBalance(address_input!);
+
+            setBalance({
+                ethereum: `${ethers.formatEther(ethereumBalance)} ETH`,
+                polygon: `${ethers.formatEther(polygonBalance)} MATIC`,
+                total: 'NA', // convert to USD and add
             });
         })();
     }, [valid, address_input]);

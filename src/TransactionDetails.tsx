@@ -8,9 +8,18 @@ function isValidEthereumTxHash(txHash: string): boolean {
     return regex.test(txHash);
 }
 
+type TxDetails = {
+    chain: 'ethereum' | 'polygon',
+    amount: string,
+    timestamp: 'string',
+    confirmationStatus: 'loading' | 'successful' | 'failed',
+    fee: string,
+}
+
 export default function TransactionDetails() {
     const { tx_input } = useParams();
     const [valid, setValid] = React.useState(false);
+    const [chain, setChain] = React.useState<'ethereum' | 'polygon' | 'loading'>('loading');
 
     React.useEffect(() => { // is the provided input a valid address?
         if (tx_input === undefined)
@@ -23,6 +32,11 @@ export default function TransactionDetails() {
         setValid(false);
         return;
     }, [tx_input]);
+
+    React.useEffect(() => { // find the transaction details
+
+
+    })
 
     if (!valid)
         return <>
