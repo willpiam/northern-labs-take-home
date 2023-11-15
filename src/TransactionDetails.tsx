@@ -28,7 +28,7 @@ export default function TransactionDetails() {
         return <>
             <h1>Invalid Transaction Hash</h1>
             <h2>{tx_input}</h2>
-            <Link to="/tx/0x5a2e936f418affd295fcd91e8bbbbcc04ad58451bed856d4cf5b2413bd270a72">Try a demo Tx</Link>
+            <Link to="/tx/0x5a2e936f418affd295fcd91e8bbbbcc04ad58451bed856d4cf5b2413bd270a72">Try a demo Transaction</Link>
         </>
 
     return <>
