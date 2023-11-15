@@ -99,6 +99,7 @@ export default function AddressDetails() {
     });
     const [ethereumTransactions, setEthereumTransactions] = React.useState<Transaction[]>([]);
     const [polygonTransactions, setPolygonTransactions] = React.useState<Transaction[]>([]);
+    const [sortBy, setSortBy] = React.useState<'time' | 'amount'>('time');
 
     const [valid, setValid] = React.useState(false);
 
@@ -157,13 +158,22 @@ export default function AddressDetails() {
             return;
         if (txCount.total === 0)
             return;
+        const sortTransactionsBy = (txs: any[], sortBy: 'time' | 'amount') => {
+            return txs.sort((a, b) => {
+                if (sortBy === 'time') {
+                    return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+                }
+                return parseFloat(a.amount) - parseFloat(b.amount);
+            });
+        }
         (async () => {
             const ethtransactions = await fetchTransactionHashes('etherscan.io', address_input!, process.env.REACT_APP_ETHERSCAN_KEY!);
-            setEthereumTransactions(ethtransactions);
+            setEthereumTransactions(sortTransactionsBy(ethtransactions, sortBy));
+
             const polytransactions = await fetchTransactionHashes('polygonscan.com', address_input!, process.env.REACT_APP_POLYSCAN_KEY!);
-            setPolygonTransactions(polytransactions);
+            setPolygonTransactions(sortTransactionsBy(polytransactions, sortBy));
         })()
-    }, [valid, address_input, txCount]);
+    }, [valid, address_input, txCount, sortBy]);
 
     if (!valid) {
         return <div className="container">
@@ -251,6 +261,17 @@ export default function AddressDetails() {
                     <div className="cell">{balance.total}</div>
                 </div>
             </div>
+            <div className="sorting-switch">
+                <label>
+                    Sort by:
+                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'time' | 'amount')}>
+                        <option value="time">Time</option>
+                        <option value="amount">Amount</option>
+                    </select>
+                </label>
+            </div>
+
+
             <div className="etherscan-provided-data">
                 <h2>The following data comes from a centralized indexing service.</h2>
                 <h3>In practice these calls should be made on a server to protect the API key or even to use a custom indexing solution.</h3>
