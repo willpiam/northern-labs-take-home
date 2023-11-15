@@ -10,35 +10,35 @@ interface Transaction {
     amount: string;
     timestamp: string;
     nonce: number;
-    // ... other relevant properties
+    sender: string;
 }
 
 async function fetchTransactionHashes(
+    site: string,
     address: string,
-    startBlock: number,
-    endBlock: number,
     apiKey: string,
 ): Promise<any[]> {
-    const url = `https://api.etherscan.io/api
+    const url = `https://api.${site}/api
 ?module=account
 &action=txlist
-&address=0xc5102fE9359FD9a28f877a67E36B0F050d81a3CC
+&address=${address}
 &startblock=0
 &endblock=99999999
 &page=1
-&offset=10
+&offset=0
 &sort=asc
 &apikey=${apiKey}`.trim()
 
     try {
         const response = await axios.get(url);
         const transactions: any[] = response.data.result;
-        console.log(transactions)
+        // return transactions.filter(tx => tx.from.toUpperCase() === address.toUpperCase()).map((transaction: any): Transaction => ({
         return transactions.map((transaction: any): Transaction => ({
             hash: transaction.hash,
             amount: ethers.formatEther(transaction.value),
             timestamp: new Date(parseInt(transaction.timeStamp) * 1000).toLocaleString(),
             nonce: parseInt(transaction.nonce),
+            sender: transaction.from,
         }));
     } catch (error) {
         console.error(error);
@@ -46,11 +46,57 @@ async function fetchTransactionHashes(
     }
 }
 
+type HistoricTableProps = {
+    transactions: Transaction[],
+    user: string,
+}
 
+function HistoricTable(props: HistoricTableProps) {
+    return <>
+        <table border={1}>
+            <thead>
+                <tr>
+                    <th>In Or Out</th>
+                    <th>Transaction Hash</th>
+                    <th>Amount</th>
+                    <th>Timestamp</th>
+                    <th>Nonce</th>
+                    <th>See More</th>
+                </tr>
+            </thead>
+            <tbody>
 
-
-
-
+                {
+                    props.transactions.map((transaction: Transaction) => {
+                        return <tr>
+                            <td>
+                               <div style={{
+                                background: transaction.sender.toUpperCase() === props.user.toUpperCase() ? '#ff7f7f' : 'lightgreen' , 
+                               }}>
+                                      {transaction.sender.toUpperCase() === props.user.toUpperCase() ? 'Out' : 'In'}
+                               </div>
+                            </td>
+                            <td>{transaction.hash}</td>
+                            <td>{transaction.amount}</td>
+                            <td>{transaction.timestamp}</td>
+                            <td>
+                                {transaction.nonce}
+                            </td>
+                            <td>
+                                <Link to={`/tx/${transaction.hash}`}>
+                                    See More
+                                </Link>
+                            </td>
+                        </tr>
+                    })
+                }
+            </tbody>
+        </table>
+        {
+            `${props.transactions.length} transactions listed`
+        }
+    </>
+}
 
 export default function AddressDetails() {
     const { address_input } = useParams();
@@ -64,7 +110,8 @@ export default function AddressDetails() {
         polygon: '0',
         total: '0',
     });
-    const [transactions, setTransactions] = React.useState<Transaction[]>([]); // [Transaction, Transaction, Transaction
+    const [ethereumTransactions, setEthereumTransactions] = React.useState<Transaction[]>([]);
+    const [polygonTransactions, setPolygonTransactions] = React.useState<Transaction[]>([]);
 
     const [valid, setValid] = React.useState(false);
 
@@ -124,9 +171,10 @@ export default function AddressDetails() {
         if (txCount.total === 0)
             return;
         (async () => {
-            const transactions = await fetchTransactionHashes(address_input!, 0, txCount.ethereum, process.env.REACT_APP_ETHERSCAN_KEY!);
-            console.log(transactions)
-            setTransactions(transactions);
+            const ethtransactions = await fetchTransactionHashes('etherscan.io', address_input!, process.env.REACT_APP_ETHERSCAN_KEY!);
+            setEthereumTransactions(ethtransactions);
+            const polytransactions = await fetchTransactionHashes('polygonscan.com', address_input!, process.env.REACT_APP_POLYSCAN_KEY!);
+            setPolygonTransactions(polytransactions);
         })()
     }, [valid, address_input, txCount]);
 
@@ -180,38 +228,12 @@ export default function AddressDetails() {
             <h2>
                 Ethereum Transactions
             </h2>
-            <table border={1}>
+            <HistoricTable transactions={ethereumTransactions} user={address_input ?? ethers.ZeroAddress} />
+            <h2>
+                Polygon Transactions
+            </h2>
+            <HistoricTable transactions={polygonTransactions}  user={address_input ?? ethers.ZeroAddress}/>
 
-                <thead>
-                    <tr>
-                        <th>Transaction Hash</th>
-                        <th>Amount</th>
-                        <th>Timestamp</th>
-                        <th>Nonce</th>
-                        <th>See More</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    {
-                        transactions.map((transaction: Transaction) => {
-                            return <tr>
-                                <td>{transaction.hash}</td>
-                                <td>{transaction.amount}</td>
-                                <td>{transaction.timestamp}</td>
-                                <td>
-                                    {transaction.nonce}
-                                </td>
-                                <td>
-                                    <Link to={`/tx/${transaction.hash}`}>
-                                        See More
-                                    </Link>
-                                </td>
-                            </tr>
-                        })
-                    }
-                </tbody>
-            </table>
         </div>
 
     </>
