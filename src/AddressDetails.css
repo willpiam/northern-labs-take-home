@@ -1,0 +1,85 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f4f4f4;
+    color: #333;
+}
+
+h1, h2, h3 {
+    color: #333;
+}
+
+.link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+/* Container */
+.container {
+    width: 90%;
+    margin: auto;
+    max-width: 1200px;
+}
+
+/* Table Replacement */
+.data-table {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.data-table .row {
+    flex-basis: 100%;
+    display: flex;
+    background: #fff;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+.data-table .row.header {
+    background: #007bff;
+    color: #fff;
+}
+
+.data-table .row .cell {
+    flex: 1;
+    padding: 5px 10px;
+}
+
+/* Mobile Styles */
+@media (max-width: 600px) {
+    .data-table .row {
+        flex-direction: column;
+    }
+}
+
+/* Desktop Styles */
+@media (min-width: 601px) {
+    .data-table .row .cell {
+        text-align: center;
+    }
+
+    .data-table .row.header .cell {
+        font-weight: bold;
+    }
+}
+
+/* Transaction Status Styles */
+.status {
+    display: inline-block;
+    padding: 2px 5px;
+    border-radius: 5px;
+    color: #fff;
+}
+
+.status.in {
+    background-color: lightgreen;
+}
+
+.status.out {
+    background-color: #ff7f7f;
+}

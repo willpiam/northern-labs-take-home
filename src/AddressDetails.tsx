@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { getEthereumProvider, getPolygonProvider } from './Providers';
 import axios from 'axios';
+import './AddressDetails.css'; // Import the CSS file
 
 interface Transaction {
     hash: string;
@@ -52,50 +53,36 @@ type HistoricTableProps = {
 }
 
 function HistoricTable(props: HistoricTableProps) {
-    return <>
-        <table border={1}>
-            <thead>
-                <tr>
-                    <th>In Or Out</th>
-                    <th>Transaction Hash</th>
-                    <th>Amount</th>
-                    <th>Timestamp</th>
-                    <th>Nonce</th>
-                    <th>See More</th>
-                </tr>
-            </thead>
-            <tbody>
-
-                {
-                    props.transactions.map((transaction: Transaction) => {
-                        return <tr>
-                            <td>
-                               <div style={{
-                                background: transaction.sender.toUpperCase() === props.user.toUpperCase() ? '#ff7f7f' : 'lightgreen' , 
-                               }}>
-                                      {transaction.sender.toUpperCase() === props.user.toUpperCase() ? 'Out' : 'In'}
-                               </div>
-                            </td>
-                            <td>{transaction.hash}</td>
-                            <td>{transaction.amount}</td>
-                            <td>{transaction.timestamp}</td>
-                            <td>
-                                {transaction.nonce}
-                            </td>
-                            <td>
-                                <Link to={`/tx/${transaction.hash}`}>
-                                    See More
-                                </Link>
-                            </td>
-                        </tr>
-                    })
-                }
-            </tbody>
-        </table>
-        {
-            `${props.transactions.length} transactions listed`
-        }
-    </>
+    return (
+        <div className="data-table">
+            <div className="row header">
+                <div className="cell">In Or Out</div>
+                <div className="cell">Transaction Hash</div>
+                <div className="cell">Amount</div>
+                <div className="cell">Timestamp</div>
+                <div className="cell">Nonce</div>
+                <div className="cell">See More</div>
+            </div>
+            {props.transactions.map((transaction: Transaction) => (
+                <div className="row">
+                    <div className="cell">
+                        <div className={`status ${transaction.sender.toUpperCase() === props.user.toUpperCase() ? 'out' : 'in'}`}>
+                            {transaction.sender.toUpperCase() === props.user.toUpperCase() ? 'Out' : 'In'}
+                        </div>
+                    </div>
+                    <div className="cell">{transaction.hash.substring(0, 10)}</div>
+                    <div className="cell">{transaction.amount}</div>
+                    <div className="cell">{transaction.timestamp}</div>
+                    <div className="cell">{transaction.nonce}</div>
+                    <div className="cell">
+                        <Link to={`/tx/${transaction.hash}`} className="link">
+                            See More
+                        </Link>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 }
 
 export default function AddressDetails() {
@@ -232,8 +219,7 @@ export default function AddressDetails() {
             <h2>
                 Polygon Transactions
             </h2>
-            <HistoricTable transactions={polygonTransactions}  user={address_input ?? ethers.ZeroAddress}/>
-
+            <HistoricTable transactions={polygonTransactions} user={address_input ?? ethers.ZeroAddress} />
         </div>
 
     </>
