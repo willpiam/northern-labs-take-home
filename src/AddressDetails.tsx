@@ -166,61 +166,99 @@ export default function AddressDetails() {
     }, [valid, address_input, txCount]);
 
     if (!valid) {
-        return <>
+        return <div className="container">
             <h1>Invalid Address</h1>
             <h2>{address_input}</h2>
-            <Link to="/address/0xd90f7Fb941829CFE7Fc50eD235d1Efac05c58190">Try a demo address</Link>
-        </>
-    }
-
-    return <>
-        <h1>Address Details</h1>
-        <h2>
-            {address_input}
-        </h2>
-        <table border={1}>
-            <thead>
-                <tr>
-                    <th>Network</th>
-                    <th>Transaction Count</th>
-                    <th>Balance</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Ethereum</td>
-                    <td>{txCount.ethereum}</td>
-                    <td>{balance.ethereum}</td>
-                </tr>
-                <tr>
-                    <td>Polygon</td>
-                    <td>{txCount.polygon}</td>
-                    <td>{balance.polygon}</td>
-                </tr>
-                <tr>
-                    <td>Total</td>
-                    <td>{txCount.total}</td>
-                    <td>{balance.total}</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div className="etherscan-provided-data">
-            <h2>
-                The following data comes from a centralized indexing service.
-            </h2>
-            <h3>
-                In practice these calls should be made on a server to protect the API key or even to use a custom indexing solution.
-            </h3>
-            <h2>
-                Ethereum Transactions
-            </h2>
-            <HistoricTable transactions={ethereumTransactions} user={address_input ?? ethers.ZeroAddress} />
-            <h2>
-                Polygon Transactions
-            </h2>
-            <HistoricTable transactions={polygonTransactions} user={address_input ?? ethers.ZeroAddress} />
+            <Link to="/address/0xd90f7Fb941829CFE7Fc50eD235d1Efac05c58190" className="link">Try a demo address</Link>
         </div>
 
-    </>
+    }
+
+    // return <>
+    //     <h1>Address Details</h1>
+    //     <h2>
+    //         {address_input}
+    //     </h2>
+    //     <table border={1}>
+    //         <thead>
+    //             <tr>
+    //                 <th>Network</th>
+    //                 <th>Transaction Count</th>
+    //                 <th>Balance</th>
+    //             </tr>
+    //         </thead>
+    //         <tbody>
+    //             <tr>
+    //                 <td>Ethereum</td>
+    //                 <td>{txCount.ethereum}</td>
+    //                 <td>{balance.ethereum}</td>
+    //             </tr>
+    //             <tr>
+    //                 <td>Polygon</td>
+    //                 <td>{txCount.polygon}</td>
+    //                 <td>{balance.polygon}</td>
+    //             </tr>
+    //             <tr>
+    //                 <td>Total</td>
+    //                 <td>{txCount.total}</td>
+    //                 <td>{balance.total}</td>
+    //             </tr>
+    //         </tbody>
+    //     </table>
+
+    //     <div className="etherscan-provided-data">
+    //         <h2>
+    //             The following data comes from a centralized indexing service.
+    //         </h2>
+    //         <h3>
+    //             In practice these calls should be made on a server to protect the API key or even to use a custom indexing solution.
+    //         </h3>
+    //         <h2>
+    //             Ethereum Transactions
+    //         </h2>
+    //         <HistoricTable transactions={ethereumTransactions} user={address_input ?? ethers.ZeroAddress} />
+    //         <h2>
+    //             Polygon Transactions
+    //         </h2>
+    //         <HistoricTable transactions={polygonTransactions} user={address_input ?? ethers.ZeroAddress} />
+    //     </div>
+
+    // </>
+
+    return (
+        <div className="container">
+            <h1>Address Details</h1>
+            <h2>{address_input}</h2>
+            <div className="data-table">
+                <div className="row header">
+                    <div className="cell">Network</div>
+                    <div className="cell">Transaction Count</div>
+                    <div className="cell">Balance</div>
+                </div>
+                <div className="row">
+                    <div className="cell">Ethereum</div>
+                    <div className="cell">{txCount.ethereum}</div>
+                    <div className="cell">{balance.ethereum}</div>
+                </div>
+                <div className="row">
+                    <div className="cell">Polygon</div>
+                    <div className="cell">{txCount.polygon}</div>
+                    <div className="cell">{balance.polygon}</div>
+                </div>
+                <div className="row">
+                    <div className="cell">Total</div>
+                    <div className="cell">{txCount.total}</div>
+                    <div className="cell">{balance.total}</div>
+                </div>
+            </div>
+            <div className="etherscan-provided-data">
+                <h2>The following data comes from a centralized indexing service.</h2>
+                <h3>In practice these calls should be made on a server to protect the API key or even to use a custom indexing solution.</h3>
+                <h2>Ethereum Transactions</h2>
+                <HistoricTable transactions={ethereumTransactions} user={address_input ?? ethers.ZeroAddress} />
+                <h2>Polygon Transactions</h2>
+                <HistoricTable transactions={polygonTransactions} user={address_input ?? ethers.ZeroAddress} />
+            </div>
+        </div>
+    );
 }
