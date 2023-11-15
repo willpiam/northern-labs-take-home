@@ -15,6 +15,7 @@ type TxDetails = {
     timestamp: string,
     confirmationStatus: 'loading' | 'successful' | 'failed',
     fee: string,
+    nonce: number,
 }
 
 export default function TransactionDetails() {
@@ -65,6 +66,7 @@ export default function TransactionDetails() {
                 timestamp: timestamp,
                 confirmationStatus: 'successful', // temporary place holder 
                 fee: `${ethers.formatEther(result!.gasPrice * result!.gasLimit)} ${ethereumResult === null ? 'MATIC' : 'ETH'}`,
+                nonce: result!.nonce,
             }
 
             setDetails(details);
@@ -101,6 +103,9 @@ export default function TransactionDetails() {
                     <th>
                         Fee
                     </th>
+                    <th>
+                        Nonce
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -119,6 +124,9 @@ export default function TransactionDetails() {
                     </td>
                     <td>
                         {details?.fee}
+                    </td>
+                    <td>
+                        {details?.nonce}
                     </td>
                 </tr>
             </tbody>

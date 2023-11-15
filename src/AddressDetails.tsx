@@ -7,6 +7,9 @@ import axios from 'axios';
 
 interface Transaction {
     hash: string;
+    amount: string;
+    timestamp: string;
+    nonce: number;
     // ... other relevant properties
 }
 
@@ -16,7 +19,6 @@ async function fetchTransactionHashes(
     endBlock: number,
     apiKey: string,
 ): Promise<any[]> {
-    // const url = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${apiKey}`;
     const url = `https://api.etherscan.io/api
 ?module=account
 &action=txlist
@@ -30,9 +32,14 @@ async function fetchTransactionHashes(
 
     try {
         const response = await axios.get(url);
-        const transactions: Transaction[] = response.data.result;
-        // return transactions.map(tx => tx.hash);
-        return transactions;
+        const transactions: any[] = response.data.result;
+        console.log(transactions)
+        return transactions.map((transaction: any): Transaction => ({
+            hash: transaction.hash,
+            amount: ethers.formatEther(transaction.value),
+            timestamp: new Date(parseInt(transaction.timeStamp) * 1000).toLocaleString(),
+            nonce: parseInt(transaction.nonce),
+        }));
     } catch (error) {
         console.error(error);
         return [];
@@ -57,6 +64,7 @@ export default function AddressDetails() {
         polygon: '0',
         total: '0',
     });
+    const [transactions, setTransactions] = React.useState<Transaction[]>([]); // [Transaction, Transaction, Transaction
 
     const [valid, setValid] = React.useState(false);
 
@@ -118,6 +126,7 @@ export default function AddressDetails() {
         (async () => {
             const transactions = await fetchTransactionHashes(address_input!, 0, txCount.ethereum, process.env.REACT_APP_ETHERSCAN_KEY!);
             console.log(transactions)
+            setTransactions(transactions);
         })()
     }, [valid, address_input, txCount]);
 
@@ -168,7 +177,41 @@ export default function AddressDetails() {
             <h3>
                 In practice these calls should be made on a server to protect the API key or even to use a custom indexing solution.
             </h3>
-            {process.env.REACT_APP_ETHERSCAN_KEY}
+            <h2>
+                Ethereum Transactions
+            </h2>
+            <table border={1}>
+
+                <thead>
+                    <tr>
+                        <th>Transaction Hash</th>
+                        <th>Amount</th>
+                        <th>Timestamp</th>
+                        <th>Nonce</th>
+                        <th>See More</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {
+                        transactions.map((transaction: Transaction) => {
+                            return <tr>
+                                <td>{transaction.hash}</td>
+                                <td>{transaction.amount}</td>
+                                <td>{transaction.timestamp}</td>
+                                <td>
+                                    {transaction.nonce}
+                                </td>
+                                <td>
+                                    <Link to={`/tx/${transaction.hash}`}>
+                                        See More
+                                    </Link>
+                                </td>
+                            </tr>
+                        })
+                    }
+                </tbody>
+            </table>
         </div>
 
     </>
