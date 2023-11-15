@@ -4,11 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { getEthereumProvider, getPolygonProvider } from './Providers';
 import './TransactionDetails.css';
-
-function isValidEthereumTxHash(txHash: string): boolean {
-    const regex = /^0x[a-fA-F0-9]{64}$/;
-    return regex.test(txHash);
-}
+import isValidEthereumTxHash from './isValidEthereumTxHash';
 
 type TxDetails = {
     chain: 'ethereum' | 'polygon',
