@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { getEthereumProvider, getPolygonProvider } from './Providers';
 
-function isValidEthereumTxHash(txHash: string): boolean { 
+function isValidEthereumTxHash(txHash: string): boolean {
     const regex = /^0x[a-fA-F0-9]{64}$/;
     return regex.test(txHash);
 }
@@ -40,7 +40,7 @@ export default function TransactionDetails() {
 
         const ethereum = getEthereumProvider();
         const polygon = getPolygonProvider();
-        
+
         (async () => { // use the provider to get the transaction details
 
             const ethereumResult = await ethereum.getTransaction(tx_input!);
@@ -59,14 +59,14 @@ export default function TransactionDetails() {
 
             const timestamp = new Date(block!.timestamp * 1000).toLocaleString();
 
-            const details : TxDetails = {
+            const details: TxDetails = {
                 chain: ethereumResult === null ? 'polygon' : 'ethereum',
-                amount: ethers.formatEther(result!.value),
+                amount: `${ethers.formatEther(result!.value)} ${ethereumResult === null ? 'MATIC' : 'ETH'}`,
                 timestamp: timestamp,
-                confirmationStatus: 'successful', // temporary place holder
-                fee: ethers.formatEther(result!.gasPrice * result!.gasLimit), // not confident on this formula
-            } 
-          
+                confirmationStatus: 'successful', // temporary place holder 
+                fee: `${ethers.formatEther(result!.gasPrice * result!.gasLimit)} ${ethereumResult === null ? 'MATIC' : 'ETH'}`,
+            }
+
             setDetails(details);
         })();
 
@@ -85,21 +85,23 @@ export default function TransactionDetails() {
         <h2>{tx_input}</h2>
         <table border={1}>
             <thead>
-                <th>
-                    Chain
-                </th>
-                <th>
-                    Amount
-                </th>
-                <th>
-                    Timestamp
-                </th>
-                <th>
-                    Confirmation Status
-                </th>
-                <th>
-                    Fee
-                </th>
+                <tr>
+                    <th>
+                        Chain
+                    </th>
+                    <th>
+                        Amount
+                    </th>
+                    <th>
+                        Timestamp
+                    </th>
+                    <th>
+                        Confirmation Status
+                    </th>
+                    <th>
+                        Fee
+                    </th>
+                </tr>
             </thead>
             <tbody>
                 <tr>

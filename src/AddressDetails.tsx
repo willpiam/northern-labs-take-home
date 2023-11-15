@@ -3,6 +3,47 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { getEthereumProvider, getPolygonProvider } from './Providers';
+import axios from 'axios';
+
+interface Transaction {
+    hash: string;
+    // ... other relevant properties
+}
+
+async function fetchTransactionHashes(
+    address: string,
+    startBlock: number,
+    endBlock: number,
+    apiKey: string,
+): Promise<any[]> {
+    // const url = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${apiKey}`;
+    const url = `https://api.etherscan.io/api
+?module=account
+&action=txlist
+&address=0xc5102fE9359FD9a28f877a67E36B0F050d81a3CC
+&startblock=0
+&endblock=99999999
+&page=1
+&offset=10
+&sort=asc
+&apikey=${apiKey}`.trim()
+
+    try {
+        const response = await axios.get(url);
+        const transactions: Transaction[] = response.data.result;
+        // return transactions.map(tx => tx.hash);
+        return transactions;
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}
+
+
+
+
+
+
 
 export default function AddressDetails() {
     const { address_input } = useParams();
@@ -67,6 +108,18 @@ export default function AddressDetails() {
         })();
     }, [valid, address_input]);
 
+    React.useEffect(() => { // given: address + txCount -> find the transactions
+        if (!valid)
+            return;
+        if (address_input === undefined)
+            return;
+        if (txCount.total === 0)
+            return;
+        (async () => {
+            const transactions = await fetchTransactionHashes(address_input!, 0, txCount.ethereum, process.env.REACT_APP_ETHERSCAN_KEY!);
+            console.log(transactions)
+        })()
+    }, [valid, address_input, txCount]);
 
     if (!valid) {
         return <>
@@ -80,33 +133,43 @@ export default function AddressDetails() {
         <h1>Address Details</h1>
         <h2>
             {address_input}
-            <table border={1}>
-                <thead>
-                    <tr>
-                        <th>Network</th>
-                        <th>Transaction Count</th>
-                        <th>Balance</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Ethereum</td>
-                        <td>{txCount.ethereum}</td>
-                        <td>{balance.ethereum}</td>
-                    </tr>
-                    <tr>
-                        <td>Polygon</td>
-                        <td>{txCount.polygon}</td>
-                        <td>{balance.polygon}</td>
-                    </tr>
-                    <tr>
-                        <td>Total</td>
-                        <td>{txCount.total}</td>
-                        <td>{balance.total}</td>
-                    </tr>
-                </tbody>
-            </table>
         </h2>
+        <table border={1}>
+            <thead>
+                <tr>
+                    <th>Network</th>
+                    <th>Transaction Count</th>
+                    <th>Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Ethereum</td>
+                    <td>{txCount.ethereum}</td>
+                    <td>{balance.ethereum}</td>
+                </tr>
+                <tr>
+                    <td>Polygon</td>
+                    <td>{txCount.polygon}</td>
+                    <td>{balance.polygon}</td>
+                </tr>
+                <tr>
+                    <td>Total</td>
+                    <td>{txCount.total}</td>
+                    <td>{balance.total}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div className="etherscan-provided-data">
+            <h2>
+                The following data comes from a centralized indexing service.
+            </h2>
+            <h3>
+                In practice these calls should be made on a server to protect the API key or even to use a custom indexing solution.
+            </h3>
+            {process.env.REACT_APP_ETHERSCAN_KEY}
+        </div>
 
     </>
 }
