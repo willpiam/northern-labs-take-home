@@ -8,6 +8,8 @@ import isValidEthereumTxHash from './isValidEthereumTxHash';
 
 type TxDetails = {
     chain: 'ethereum' | 'polygon',
+    to: string,
+    from: string,
     amount: string,
     timestamp: string,
     fee: string,
@@ -63,6 +65,7 @@ export default function TransactionDetails() {
             console.log("recipt: ", receipt);
             const didRevert = receipt?.status === 0;
             const result = ethereumResult ?? polygonResult;
+            console.log("result: ", result )
 
             // to get the timestamp we need the block
             const block = await (ethereumResult === null ? polygon : ethereum).getBlock(result!.blockNumber!);
@@ -71,6 +74,8 @@ export default function TransactionDetails() {
 
             const details: TxDetails = {
                 chain: ethereumResult === null ? 'polygon' : 'ethereum',
+                to: result!.to ?? ethers.ZeroAddress,
+                from: receipt!.from,
                 amount: `${ethers.formatEther(result!.value)} ${ethereumResult === null ? 'MATIC' : 'ETH'}`,
                 timestamp: timestamp,
                 fee: `${ethers.formatEther(result!.gasPrice * result!.gasLimit)} ${ethereumResult === null ? 'MATIC' : 'ETH'}`,
@@ -109,6 +114,8 @@ export default function TransactionDetails() {
                                 />
                                 <DetailItem label="Fee" value={details.fee} />
                                 <DetailItem label="Nonce" value={details.nonce.toString()} />
+                                <DetailItem label="From" value={details.from} />
+                                <DetailItem label="To" value={details.to} />
                                 <div className="detail-item">
                                     <span>View More</span>
                                     <a
