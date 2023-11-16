@@ -73,7 +73,7 @@ function HistoricTable(props: HistoricTableProps) {
                         </div>
                     </div>
                     <div className="cell">{transaction.hash.substring(0, props.hashDisplayLength) + '...'}</div>
-                    <div className="cell">{transaction.amount}</div>
+                    <div className="cell">{transaction.amount}</div> {/* TODO: if sting.length > n --> truncate to n and append '...' */}
                     <div className="cell">{transaction.timestamp}</div>
                     <div className="cell">{transaction.nonce}</div>
                     <div className="cell">

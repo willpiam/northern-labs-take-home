@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { getEthereumProvider, getPolygonProvider } from './Providers';
 import './TransactionDetails.css';
 import isValidEthereumTxHash from './isValidEthereumTxHash';
+import useWindowWidth from './useWindowWidth';
 
 type TxDetails = {
     chain: 'ethereum' | 'polygon',
@@ -30,6 +31,7 @@ export default function TransactionDetails() {
     const { tx_input } = useParams();
     const [valid, setValid] = React.useState(false);
     const [details, setDetails] = React.useState<TxDetails | null>(null);
+    const windowWidth = useWindowWidth();
 
     React.useEffect(() => { // is the provided input a valid address?
         if (tx_input === undefined)
@@ -65,7 +67,7 @@ export default function TransactionDetails() {
             console.log("recipt: ", receipt);
             const didRevert = receipt?.status === 0;
             const result = ethereumResult ?? polygonResult;
-            console.log("result: ", result )
+            console.log("result: ", result)
 
             // to get the timestamp we need the block
             const block = await (ethereumResult === null ? polygon : ethereum).getBlock(result!.blockNumber!);
@@ -88,6 +90,7 @@ export default function TransactionDetails() {
 
 
     }, [valid, tx_input])
+
     return (
         <>
             {!valid ? (
@@ -101,7 +104,11 @@ export default function TransactionDetails() {
             ) : (
                 <div className="transaction-details">
                     <h1>Transaction Details</h1>
-                    <h2>{tx_input}</h2>
+                    <div style={{
+                        fontSize: windowWidth < 600 ? '0.5rem' : '2rem',
+                    }}>
+                        <h2>{tx_input}</h2>
+                    </div>
                     <div className="details-grid">
                         {details && (
                             <>
