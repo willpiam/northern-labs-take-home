@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { getEthereumProvider, getPolygonProvider } from './Providers';
 import axios from 'axios';
 import './AddressDetails.css'; // Import the CSS file
+import useWindowWidth from './useWindowWidth';
 
 interface Transaction {
     hash: string;
@@ -50,6 +51,7 @@ async function fetchTransactionHashes(
 type HistoricTableProps = {
     transactions: Transaction[],
     user: string,
+    hashDisplayLength: number,
 }
 
 function HistoricTable(props: HistoricTableProps) {
@@ -70,7 +72,7 @@ function HistoricTable(props: HistoricTableProps) {
                             {transaction.sender.toUpperCase() === props.user.toUpperCase() ? 'Out' : 'In'}
                         </div>
                     </div>
-                    <div className="cell">{transaction.hash.substring(0, 10)}</div>
+                    <div className="cell">{transaction.hash.substring(0, props.hashDisplayLength) + '...'}</div>
                     <div className="cell">{transaction.amount}</div>
                     <div className="cell">{transaction.timestamp}</div>
                     <div className="cell">{transaction.nonce}</div>
@@ -102,6 +104,10 @@ export default function AddressDetails() {
     const [sortBy, setSortBy] = React.useState<'time' | 'amount'>('time');
 
     const [valid, setValid] = React.useState(false);
+
+    const windowWidth = useWindowWidth();
+
+    const [hashDisplayLength, setHashDisplayLength] = React.useState(10);
 
     React.useEffect(() => { // is the provided input a valid address?
         if (ethers.isAddress(address_input)) {
@@ -175,6 +181,14 @@ export default function AddressDetails() {
         })()
     }, [valid, address_input, txCount, sortBy]);
 
+    React.useEffect(() => { // calculate the hash display length
+        if (windowWidth > 600) {
+            setHashDisplayLength(10);
+            return;
+        }
+        setHashDisplayLength(33); // full length -> 66
+    }, [windowWidth]);
+
     if (!valid) {
         return <div className="container">
             <h1>Invalid Address</h1>
@@ -225,9 +239,17 @@ export default function AddressDetails() {
                 <h2>The following data comes from a centralized indexing service.</h2>
                 <h3>In practice these calls should be made on a server to protect the API key or even to use a custom indexing solution.</h3>
                 <h2>Ethereum Transactions</h2>
-                <HistoricTable transactions={ethereumTransactions} user={address_input ?? ethers.ZeroAddress} />
+                <HistoricTable
+                    transactions={ethereumTransactions}
+                    user={address_input ?? ethers.ZeroAddress}
+                    hashDisplayLength={hashDisplayLength}
+                />
                 <h2>Polygon Transactions</h2>
-                <HistoricTable transactions={polygonTransactions} user={address_input ?? ethers.ZeroAddress} />
+                <HistoricTable
+                    transactions={polygonTransactions}
+                    user={address_input ?? ethers.ZeroAddress}
+                    hashDisplayLength={hashDisplayLength}
+                />
             </div>
         </div>
     );
