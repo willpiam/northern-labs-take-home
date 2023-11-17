@@ -96,6 +96,7 @@ function HistoricTable(props: HistoricTableProps) {
     );
 }
 
+
 export default function AddressDetails() {
     const { address_input } = useParams();
     const [txCount, setTxCount] = React.useState({
@@ -117,6 +118,9 @@ export default function AddressDetails() {
     const windowWidth = useWindowWidth();
 
     const [hashDisplayLength, setHashDisplayLength] = React.useState(10);
+
+    const [ethToUsdRate, setEthToUsdRate] = React.useState(0);
+    const [maticToUsdRate, setMaticToUsdRate] = React.useState(0);
 
     React.useEffect(() => { // is the provided input a valid address?
         if (ethers.isAddress(address_input)) {
@@ -158,13 +162,16 @@ export default function AddressDetails() {
             const ethereumBalance = await ethereum.getBalance(address_input!);
             const polygonBalance = await polygon.getBalance(address_input!);
 
+            const ethUSDValue = parseFloat(ethers.formatEther(ethereumBalance)) * ethToUsdRate;
+            const maticUSDValue = parseFloat(ethers.formatEther(polygonBalance)) * maticToUsdRate;
+
             setBalance({
                 ethereum: `${ethers.formatEther(ethereumBalance)} ETH`,
                 polygon: `${ethers.formatEther(polygonBalance)} MATIC`,
-                total: 'NA', // convert to USD and add
+                total: (ethUSDValue + maticUSDValue).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) + ' USD',
             });
         })();
-    }, [valid, address_input]);
+    }, [valid, address_input, ethToUsdRate, maticToUsdRate]);
 
     React.useEffect(() => { // given: address + txCount -> find the transactions
         if (!valid)
@@ -197,6 +204,27 @@ export default function AddressDetails() {
         }
         setHashDisplayLength(33); // full length -> 66
     }, [windowWidth]);
+
+    React.useEffect(() => { // get the ETH to USD rate
+        const ethereum = getEthereumProvider();
+        const loadConversionRate = async (conversionAddress: string) : Promise<number> => {
+            const conversionABI = [
+                'function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)',
+                'function decimals() external view returns (uint8)',
+            ]
+
+            const conversionContract = new ethers.Contract(conversionAddress, conversionABI, ethereum);
+            const conversionResult = await conversionContract.latestRoundData();
+            const decimals = await conversionContract.decimals();
+            const rate = parseInt(conversionResult.answer.toString()) / 10 ** parseInt(decimals.toString());
+
+            // setEthToUsdRate(rate);
+            return rate;
+        };
+
+        loadConversionRate('0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419').then((rate) => setEthToUsdRate(rate));
+        loadConversionRate('0x7bac85a8a13a4bcd8abb3eb7d6b4d632c5a57676').then((rate) => setMaticToUsdRate(rate));
+    }, []);
 
     if (!valid) {
         return <div className="container">

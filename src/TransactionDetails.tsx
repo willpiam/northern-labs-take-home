@@ -51,11 +51,13 @@ export default function TransactionDetails() {
 
         const ethereum = getEthereumProvider();
         const polygon = getPolygonProvider();
-
+        console.log("[STUB:TransactionDetails.tsx] have providers");
         (async () => { // use the provider to get the transaction details
 
             const ethereumResult = await ethereum.getTransaction(tx_input!);
+            console.log("[STUB:TransactionDetails.tsx] have ethereumResult")
             const polygonResult = await polygon.getTransaction(tx_input!);
+            console.log("[STUB:TransactionDetails.tsx] have polygonResult")
 
             // case -> both null
             if (ethereumResult === null && polygonResult === null) {
@@ -71,6 +73,7 @@ export default function TransactionDetails() {
 
             // to get the timestamp we need the block
             const block = await (ethereumResult === null ? polygon : ethereum).getBlock(result!.blockNumber!);
+            console.log("[STUB:TransactionDetails.tsx] have block")
 
             const timestamp = new Date(block!.timestamp * 1000).toLocaleString();
 
