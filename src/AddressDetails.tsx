@@ -54,6 +54,13 @@ type HistoricTableProps = {
     hashDisplayLength: number,
 }
 
+const transformHash = (hash: string, hashDisplayLength: number) => hash.substring(0, hashDisplayLength) + '...';
+const transformAmount = (amount: string) => {
+    if (amount.length <= 10)
+        return amount;
+    return '~' + amount.substring(0, 10) + '...';
+}
+
 function HistoricTable(props: HistoricTableProps) {
     return (
         <div className="data-table">
@@ -72,8 +79,10 @@ function HistoricTable(props: HistoricTableProps) {
                             {transaction.sender.toUpperCase() === props.user.toUpperCase() ? 'Out' : 'In'}
                         </div>
                     </div>
-                    <div className="cell">{transaction.hash.substring(0, props.hashDisplayLength) + '...'}</div>
-                    <div className="cell">{transaction.amount}</div> {/* TODO: if sting.length > n --> truncate to n and append '...' */}
+                    {/* <div className="cell">{transaction.hash.substring(0, props.hashDisplayLength) + '...'}</div> */}
+                    <div className="cell">{transformHash(transaction.hash, props.hashDisplayLength)}</div>
+                    {/* <div className="cell">{transaction.amount}</div> TODO: if sting.length > n --> truncate to n and append '...' */}
+                    <div className="cell">{transformAmount(transaction.amount)}</div> {/* TODO: if sting.length > n --> truncate to n and append '...' */}
                     <div className="cell">{transaction.timestamp}</div>
                     <div className="cell">{transaction.nonce}</div>
                     <div className="cell">
