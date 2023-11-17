@@ -17,7 +17,8 @@
 }
 
 .detail-item {
-    flex: 1 1 200px; /* each item takes up at least 200px and grows */
+    flex: 1 1 200px;
+    /* each item takes up at least 200px and grows */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -32,7 +33,23 @@
 }
 
 @media (max-width: 600px) {
+    .transaction-details {
+        padding: 2px;
+        max-width: 200px;
+        margin: 0;
+    }
+
+
     .details-grid {
         flex-direction: column;
+    }
+
+    .detail-item {
+        flex: 1 1 ;
+        /* each item takes up at least 200px and grows */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 3px;
     }
 }
